@@ -1,0 +1,28 @@
+{
+    "name": "motokraft/object",
+    "description": "Implements the functionality of working with dynamic data",
+    "keywords": [ "object", "php" ],
+    "homepage": "https://github.com/motokraft/object",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Motokraft",
+            "email": "valeravk230594@mail.ru",
+            "homepage": "https://github.com/motokraft",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.0"
+    },
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Motokraft\\Object\\": ""
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
