@@ -7,15 +7,14 @@
 
 trait ErrorTrait
 {
-    private $error;
+    private ?string $error = null;
 
-    function setError(string $error) : static
+    function setError(string $error) : void
     {
         $this->error = $error;
-        return $this;
     }
 
-    function getError() : null|string
+    function getError() : ?string
     {
         return $this->error;
     }

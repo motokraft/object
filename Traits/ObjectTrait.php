@@ -9,29 +9,25 @@ use \Motokraft\Object\BaseObject;
 
 trait ObjectTrait
 {
-    private $data = [];
+    private array $data = [];
 
-    function loadArray(array $data)
+    function loadArray(array $data) : void
     {
         foreach($data as $name => $value)
         {
             $this->set($name, $value);
         }
-
-        return $this;
     }
 
-    function loadObject($object)
+    function loadObject($object) : void
     {
         if($data = $object->getCombine())
         {
             $this->loadArray($data);
         }
-
-        return $this;
     }
 
-    function loadString(string $result)
+    function loadString(string $result) : void
     {
         $data = json_decode($result);
 
@@ -39,24 +35,17 @@ trait ObjectTrait
         {
             $this->loadArray((array) $data);
         }
-
-        return $this;
     }
 
-    function mergeArray(array $data)
+    function mergeArray(array $data) : void
     {
         $data = new BaseObject($data);
-        return $this->mergeObject($data);
+        $this->mergeObject($data);
     }
 
-    function mergeObject($object)
+    function mergeObject($object) : void
     {
-        if(!$keys = $object->getKeys())
-        {
-            return $this;
-        }
-
-        foreach($keys as $name)
+        foreach($object->getKeys() as $name)
         {
             if(!$object->has($name))
             {
@@ -66,8 +55,6 @@ trait ObjectTrait
             $new_val = $object->get($name);
             $this->set($name, $new_val);
         }
-
-        return $this;
     }
 
     function getKeys() : array
@@ -190,43 +177,67 @@ trait ObjectTrait
         return $this->data;
     }
 
-    function filter(callable $func) : array
+    function map(callable $callback, bool $preserve = true) : static
     {
-        $data = $this->getCombine();
-        $result = [];
+        $result = new static;
 
-        foreach($data as $name => $value)
+        if(!$data = $this->getCombine())
         {
-            if(!$func($name, $value))
+            return $result;
+        }
+
+        foreach($data as $index => $item)
+        {
+            $value = $callback($item, $index);
+
+            if($preserve)
+            {
+                $result[$index] = $value;
+            }
+            else
+            {
+                $result->append($value);
+            }
+        }
+
+        return $result;
+    }
+
+    function filter(callable $callback, bool $preserve = true) : static
+    {
+        $result = new static;
+
+        if(!$data = $this->getCombine())
+        {
+            return $result;
+        }
+
+        foreach($data as $index => $item)
+        {
+            if(!$callback($item, $index))
             {
                 continue;
             }
 
-            $result[$name] = $value;
+            if($preserve)
+            {
+                $result[$index] = $item;
+            }
+            else
+            {
+                $result->append($value);
+            }
         }
 
         return $result;
     }
 
-    function map(callable $func) : array
-    {
-        $data = $this->getCombine();
-        $result = [];
-
-        foreach($data as $name => $value)
-        {
-            $result[$name] = $func($name, $value);
-        }
-
-        return $result;
-    }
-
-    function __get(string $name)
+    function __get(string $name) : mixed
     {
         return $this->get($name);
     }
 
-    function __set(string $name, $value)
+    function __set(string $name, $value) : void
     {
         $this->set($name, $value);
     }

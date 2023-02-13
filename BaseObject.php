@@ -5,61 +5,55 @@
  * @link https://github.com/motokraft/object
  */
 
-class BaseObject implements \ArrayAccess, \Countable, \Serializable
+class BaseObject implements \ArrayAccess, \IteratorAggregate
 {
     use Traits\ObjectTrait;
 
-    function __construct(array $data = [])
+    function __construct(array|object|string $data = [])
     {
-        if(!empty($data))
+        if(is_array($data))
         {
             $this->loadArray($data);
         }
+        else if(is_string($data))
+        {
+            $this->loadString($data);
+        }
+        else if(is_object($data))
+        {
+            $this->loadArray((array) $data);
+        }
+        else if($data instanceof static)
+        {
+            $this->mergeObject($data);
+        }
     }
 
-    function offsetExists($name)
+    function offsetExists(mixed $name) : bool
     {
         return $this->has($name);
     }
 
-    function offsetGet($name)
+    function offsetGet(mixed $name) : mixed
     {
         return $this->get($name);
     }
 
-    function offsetSet($name, $value)
+    function offsetSet(mixed $name, mixed $value) : void
     {
         $this->set($name, $value);
     }
 
-    function offsetUnset($name)
+    function offsetUnset(mixed $name) : void
     {
-        if(!$this->has($name))
+        if($this->has($name))
         {
-            return false;
+            unset($this->data[$name]);
         }
-
-        unset($this->data[$name]);
-        return true;
     }
 
-    function count()
+    function getIterator() : \Traversable
     {
-        return count($this->data);
-    }
-
-    function serialize() : string
-    {
-        return serialize($this->data);
-    }
-
-    function unserialize(string $data)
-    {
-        if(!$data = unserialize($data))
-        {
-            return false;
-        }
-
-        $this->loadArray($data);
+        return new \ArrayIterator($this->getCombine());
     }
 }
