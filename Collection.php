@@ -16,13 +16,13 @@ class Collection extends \ArrayIterator
             return $result;
         }
 
-        foreach($items as $index => $item)
+        foreach($items as $key => $item)
         {
-            $value = $callback($item, $index);
+            $value = $callback($item, $key);
 
             if($preserve)
             {
-                $result[$index] = $value;
+                $result->set($key, $value);
             }
             else
             {
@@ -42,16 +42,16 @@ class Collection extends \ArrayIterator
             return $result;
         }
 
-        foreach($items as $index => $item)
+        foreach($items as $key => $item)
         {
-            if(!$callback($item, $index))
+            if(!$callback($item, $key))
             {
                 continue;
             }
 
             if($preserve)
             {
-                $result[$index] = $item;
+                $result->set($key, $item);
             }
             else
             {
@@ -66,9 +66,9 @@ class Collection extends \ArrayIterator
     {
         $items = $this->getArrayCopy();
 
-        foreach($items as $index => $item)
+        foreach($items as $key => $item)
         {
-            $callback($item, $index);
+            $callback($item, $key);
         }
     }
 
@@ -78,16 +78,16 @@ class Collection extends \ArrayIterator
         return array_column($items, $name);
     }
 
-    function hasKey(mixed $value) : bool
+    function hasKey(mixed $value, bool $strict = false) : bool
     {
         $keys = (array) $this->getKeys();
-        return in_array($value, $keys, true);
+        return in_array($value, $keys, $strict);
     }
 
-    function hasValue(mixed $value) : bool
+    function hasValue(mixed $value, bool $strict = false) : bool
     {
         $values = (array) $this->getValues();
-        return in_array($value, $values, true);
+        return in_array($value, $values, $strict);
     }
 
     function set(string $key, mixed $value) : void
@@ -126,6 +126,22 @@ class Collection extends \ArrayIterator
     {
         $values = (array) $this->getValues();
         return implode($separator, $values);
+    }
+
+    function diffKey(array $data) : static
+    {
+        $keys = (array) $this->getKeys();
+        $values = array_diff($keys, $data);
+
+        return new static($values);
+    }
+
+    function diffValue(array $data) : static
+    {
+        $keys = (array) $this->getValues();
+        $values = array_diff($keys, $data);
+
+        return new static($values);
     }
 
     function uniqueKey() : static
